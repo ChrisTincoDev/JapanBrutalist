@@ -1,0 +1,120 @@
+<section id="hero" class="w-full h-screen flex flex-col items-center justify-center text-[13rem] font-extrabold text-[#333] relative pointer-events-none">
+  <div class="w-full flex flex-col items-center justify-center relative -space-y-12">
+    <h2 id="text1" class="uppercase font-extrabold text-2xl overflow-hidden">LOST ARCHIVES <span class="font-normal">presents</span></h2>
+    <h1 id="text2" class="overflow-hidden">LOST IN</h1>
+
+    <div class="w-1/6 aspect-video inset-0 flex items-center justify-center pointer-events-none">
+    </div>
+
+    <h1 id="text3" class="overflow-hidden">JAPAN</h1>
+    <h2 id="text4" class="uppercase font-normal text-xl overflow-hidden">Explore the world</h2>
+  </div>
+  <div class="absolute w-full bottom-0 text-lg flex items-center justify-center pb-4"> 
+    <img src="/downarrow.svg" alt="Scroll Down Arrow" class="h-10 w-10 animate-bounce"/>
+  </div>
+</section>
+
+<section id="videoContainerHero" class="w-full h-screen relative">
+  <div id="videoWrapFinalHero" class="fixed inset-0 w-full h-full p-6">
+    <div class="w-full h-full relative">
+      <video id="mainVideo" class="absolute inset-0 w-full h-full object-cover pointer-events-none" loop playsinline style="clip-path: inset(100% 0 100% 0);">
+        <source src="/JAPAN.webm" type="video/webm" />
+      </video>
+    </div>
+  </div>
+</section>
+
+<script>
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+
+gsap.registerPlugin(ScrollTrigger , SplitText);
+
+const video: HTMLVideoElement | null = document.getElementById("mainVideo") as HTMLVideoElement | null;
+const hero      = document.getElementById("hero");
+const container = document.getElementById("videoContainerHero");
+
+// Only run behaviours if the video element is present
+if (video) {
+  // Estado inicial sin controles
+  video.controls = false;
+
+  if (hero) {
+    gsap.fromTo(video,
+      { scale: 1/6, yPercent: -105 },
+      {
+        scale: 1,
+        yPercent: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: hero,
+          start: "top top",
+          end: "bottom top", // 100vh
+          scrub: true,
+        }
+      }
+    );
+  }
+
+  if (container) {
+    ScrollTrigger.create({
+      trigger: container,
+      start: "top top",           // justo cuando termina la animación de escala
+      end: "+=700",               // pin 700px
+      pin: true,
+      scrub: true,
+      onEnter: () => showControls(),
+      onLeaveBack: () => hideControls()
+    });
+  }
+} else {
+  console.warn('mainVideo element not found; skipping video animations and controls setup.');
+}
+
+function showControls() {
+  if (!video) return;
+  video.controls = true;
+  video.style.pointerEvents = "auto";
+}
+
+function hideControls() {
+  if (!video) return;
+  video.controls = false;
+}
+
+const text1 = document.getElementById("text1");
+const text2 = document.getElementById("text2");
+const text3 = document.getElementById("text3");
+const text4 = document.getElementById("text4");
+
+// Crear SplitText para cada uno
+const split1 = new SplitText(text1, { type: "chars" });
+const split2 = new SplitText(text2, { type: "chars" });
+const split3 = new SplitText(text3, { type: "chars" });
+const split4 = new SplitText(text4, { type: "chars" });
+
+// Animación independiente usando timeline
+const tl = gsap.timeline();
+
+tl.from(split1.chars, { y: 200, opacity: 0, stagger: 0.04, duration: 0.2 })
+  .from(split2.chars, { y: 200, opacity: 0, stagger: 0.03, duration: 0.5 }, "+=0.5") // "+=0.5" = espera 0.5s
+  .from(split3.chars, { y: 200, opacity: 0, stagger: 0.03, duration: 0.5 }, "+=0")
+
+gsap.fromTo(video,
+  { clipPath: 'inset(100% 0 100% 0)' },
+  {
+    clipPath: 'inset(0% 0 0% 0)',
+    duration: 1.5,
+    ease: 'power5.out',
+    delay: 2.5, // tu delay para que empiece después de los textos
+    onComplete: () => {
+      if (!video) return;
+      video.muted = true;
+      video.play(); // Se reproduce solo al terminar la animación
+    }
+  }
+);
+
+tl.from(split4.chars, { y: 200, opacity: 0, stagger: 0.03, duration: 0.2 }, "+=0.2");
+</script>
