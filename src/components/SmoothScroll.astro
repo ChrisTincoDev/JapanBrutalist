@@ -1,0 +1,20 @@
+---
+const { children } = Astro.props;
+---
+
+<script type="module">
+	import Lenis from 'lenis'
+
+	const lenis = new Lenis({
+		duration: 1.2,
+		smooth: true,
+		direction: "vertical",
+	});
+
+	function raf(time) {
+		lenis.raf(time)
+		requestAnimationFrame(raf)
+	}
+
+	requestAnimationFrame(raf)
+</script>

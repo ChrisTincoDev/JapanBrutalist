@@ -35,9 +35,7 @@ const video: HTMLVideoElement | null = document.getElementById("mainVideo") as H
 const hero      = document.getElementById("hero");
 const container = document.getElementById("videoContainerHero");
 
-// Only run behaviours if the video element is present
 if (video) {
-  // Estado inicial sin controles
   video.controls = false;
 
   if (hero) {
