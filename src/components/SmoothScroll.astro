@@ -1,20 +1,36 @@
----
-const { children } = Astro.props;
----
+<div>
+  <slot />
+</div>
 
-<script type="module">
-	import Lenis from 'lenis'
+<script is:inline type="module">
+  // Evitar SSR
+  if (typeof window !== "undefined") {
+    // Importación dinámica segura
+    Promise.all([
+      import("lenis"),
+      import("gsap"),
+      import("gsap/ScrollTrigger")
+    ]).then(([{ default: Lenis }, gsapPkg, { ScrollTrigger }]) => {
+      const gsap = gsapPkg.default;
+      gsap.registerPlugin(ScrollTrigger);
 
-	const lenis = new Lenis({
-		duration: 1.2,
-		smooth: true,
-		direction: "vertical",
-	});
+      // Iniciar Lenis
+      const lenis = new Lenis({
+        duration: 1.4, // suavidad
+        smooth: true,
+        smoothTouch: false,
+        touchMultiplier: 2,
+      });
 
-	function raf(time) {
-		lenis.raf(time)
-		requestAnimationFrame(raf)
-	}
+      // Sync GSAP ScrollTrigger
+      lenis.on("scroll", ScrollTrigger.update);
 
-	requestAnimationFrame(raf)
+      // GSAP + Lenis RAF Sync (versión PRO)
+      gsap.ticker.add((time) => {
+        lenis.raf(time * 1000);
+      });
+
+      gsap.ticker.lagSmoothing(0);
+    });
+  }
 </script>
