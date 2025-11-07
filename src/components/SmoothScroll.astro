@@ -1,36 +1,29 @@
-<div>
-  <slot />
-</div>
+---
+/* Este componente carga Lenis y GSAP únicamente en el cliente */
+import Lenis from "lenis"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 
-<script is:inline type="module">
-  // Evitar SSR
-  if (typeof window !== "undefined") {
-    // Importación dinámica segura
-    Promise.all([
-      import("lenis"),
-      import("gsap"),
-      import("gsap/ScrollTrigger")
-    ]).then(([{ default: Lenis }, gsapPkg, { ScrollTrigger }]) => {
-      const gsap = gsapPkg.default;
-      gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger)
+---
 
-      // Iniciar Lenis
-      const lenis = new Lenis({
-        duration: 1.4, // suavidad
-        smooth: true,
-        smoothTouch: false,
-        touchMultiplier: 2,
-      });
+<!-- Nada en el HTML, es solo para script -->
+<div></div>
 
-      // Sync GSAP ScrollTrigger
-      lenis.on("scroll", ScrollTrigger.update);
+<script>
+  const lenis = new Lenis({
+    duration: 1.4,
+    smooth: true,
+    smoothTouch: false,
+  })
 
-      // GSAP + Lenis RAF Sync (versión PRO)
-      gsap.ticker.add((time) => {
-        lenis.raf(time * 1000);
-      });
+  // Sincronizar con GSAP
+  lenis.on("scroll", ScrollTrigger.update)
 
-      gsap.ticker.lagSmoothing(0);
-    });
+  function raf(time) {
+    lenis.raf(time)
+    requestAnimationFrame(raf)
   }
+
+  requestAnimationFrame(raf)
 </script>

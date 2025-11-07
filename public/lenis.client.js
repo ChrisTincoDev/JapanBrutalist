@@ -1,27 +1,28 @@
-// src/scripts/lenis.client.js
-
-if (typeof window !== "undefined") {
+// public/lenis.client.js
+if (typeof window !== 'undefined') {
   Promise.all([
-    import("lenis"),
-    import("gsap"),
-    import("gsap/ScrollTrigger")
-  ]).then(([{ default: Lenis }, gsapPkg, { ScrollTrigger }]) => {
-    const gsap = gsapPkg.default;
+    import("https://cdn.jsdelivr.net/npm/lenis@1.3.13/+esm"),
+    import("https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"),
+    import("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"),
+  ]).then(([lenisModule, gsapModule, scrollTriggerModule]) => {
+    const Lenis = lenisModule.default;
+    const gsap = gsapModule.gsap || gsapModule.default;
+    const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      duration: 1.5,
+      duration: 1.4,
       smooth: true,
       smoothTouch: false,
-      touchMultiplier: 2,
     });
 
     lenis.on("scroll", ScrollTrigger.update);
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
   });
 }
